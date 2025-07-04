@@ -2,8 +2,8 @@ name: Upload Prebuild Ruby Wasm Binaries to R2
 
 on:
   schedule:
-    - cron: "0 0 * * *" # Runs every day at midnight
-  workflow_dispatch: # Allows manual triggering
+    - cron: "0 17 * * *" # ruby wasm runs at 0 15 so we run 2 hours later
+  workflow_dispatch:
 
 jobs:
   update-ruby-wasm:
