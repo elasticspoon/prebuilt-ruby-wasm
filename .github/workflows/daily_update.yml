@@ -30,4 +30,5 @@ jobs:
         id: get_version
         run: |
           LATEST_RELEASE=$(jq -r '.tag_name' release.json)
+          echo $LATEST_RELEASE
           echo "LATEST_RELEASE=${LATEST_RELEASE}" >> $GITHUB_ENV
