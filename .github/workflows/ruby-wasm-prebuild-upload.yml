@@ -1,0 +1,38 @@
+name: Upload Prebuild Ruby Wasm Binaries to R2
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # Runs every day at midnight
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  update-ruby-wasm:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version:
+          - "ruby-head-wasm32-unknown-wasip1-full"
+          - "ruby-3.4-wasm32-unknown-wasip1-full"
+          - "ruby-3.3-wasm32-unknown-wasip1-full"
+          - "ruby-3.2-wasm32-unknown-wasip1-full"
+
+    steps:
+      - name: Download lastest release binary
+        env:
+          VERSION: ${{ matrix.version }}
+        id: get_release
+        run: |
+          set -x
+          curl -LO https://github.com/ruby/ruby.wasm/releases/latest/download/${VERSION}.tar.gz
+          tar xfz ${VERSION}.tar.gz
+          mkdir tmp
+          mv ${VERSION}/usr/local/bin/ruby tmp/ruby.wasm
+
+      - uses: ryand56/r2-upload-action@latest
+        with:
+          r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+          r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+          r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          r2-bucket: ${{ secrets.R2_BUCKET }}
+          source-dir: tmp
+          destination-dir: ./${{ matrix.version }}
