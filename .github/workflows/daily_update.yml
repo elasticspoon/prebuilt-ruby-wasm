@@ -14,33 +14,34 @@ on:
 jobs:
   update-ruby-wasm:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
+    strategy:
+      matrix:
+        version:
+          - "ruby-head-wasm32-unknown-wasip1-full"
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Get latest release data
+        env:
+          VERSION: ${{ matrix.version }}
         id: get_release
         run: |
           set -x
-          curl -LO https://github.com/ruby/ruby.wasm/releases/latest/download/ruby-head-wasm32-unknown-wasip1-full.tar.gz
-          tar xfz ruby-head-wasm32-unknown-wasip1-full.tar.gz
-          mv ruby-head-wasm32-unknown-wasip1-full/usr/local/bin/ruby dist/ruby.wasm
+          curl -LO https://github.com/ruby/ruby.wasm/releases/latest/download/${VERSION}.tar.gz
+          ls
+          tar xfz ${VERSION}.tar.gz
+          ls -la ${VERSION}
+          mkdir tmp
+          mv ${VERSION}/usr/local/bin/ruby tmp/ruby.wasm
+          ls tmp
 
-      - name: Get current date
-        id: date
-        run: echo "DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "Update ruby.wasm"
-          title: "Update ruby.wasm for ${{ env.DATE }}"
-          body: "This PR updates the `ruby.wasm` file to the latest version from the ruby/ruby.wasm repository."
-          branch: "update-ruby-wasm-${{ env.DATE }}"
-          base: "main"
-          add-paths: |
-            dist/
+      # - uses: ryand56/r2-upload-action@latest
+      #   with:
+      #     r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+      #     r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+      #     r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      #     r2-bucket: ${{ secrets.R2_BUCKET }}
+      #     source-dir: tmp
+      #     destination-dir: ./${{ matrix.version }}
