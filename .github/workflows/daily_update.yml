@@ -24,5 +24,21 @@ jobs:
           set -x
           curl -LO https://github.com/ruby/ruby.wasm/releases/latest/download/ruby-head-wasm32-unknown-wasip1-full.tar.gz
           tar xfz ruby-head-wasm32-unknown-wasip1-full.tar.gz
+          ls -la
           mv ruby-head-wasm32-unknown-wasip1-full/usr/local/bin/ruby.wasm dist/ruby.wasm
 
+      - name: Get current date
+        id: date
+        run: echo "DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Update ruby.wasm"
+          title: "Update ruby.wasm for ${{ env.DATE }}"
+          body: "This PR updates the `ruby.wasm` file to the latest version from the ruby/ruby.wasm repository."
+          branch: "update-ruby-wasm-${{ env.DATE }}"
+          base: "main"
+          add-paths: |
+            dist/
