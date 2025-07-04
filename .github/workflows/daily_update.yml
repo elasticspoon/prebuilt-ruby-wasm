@@ -25,6 +25,7 @@ jobs:
           curl -LO https://github.com/ruby/ruby.wasm/releases/latest/download/ruby-head-wasm32-unknown-wasip1-full.tar.gz
           tar xfz ruby-head-wasm32-unknown-wasip1-full.tar.gz
           ls -la
+          ls -la ruby-head-wasm32-unknown-wasip1-full
           mv ruby-head-wasm32-unknown-wasip1-full/usr/local/bin/ruby.wasm dist/ruby.wasm
 
       - name: Get current date
