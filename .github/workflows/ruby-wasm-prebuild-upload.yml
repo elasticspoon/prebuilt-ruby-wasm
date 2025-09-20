@@ -45,14 +45,16 @@ jobs:
     steps:
       - name: Download lastest release binary
         id: get_release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -x
           PRERELEASE_TAG=$(gh api repos/ruby/ruby.wasm/releases \
             --jq '[.[] | select(.prerelease)][0].tag_name')
-          curl -LO https://github.com/ruby/ruby.wasm/releases/download/${PRERELEASE_TAG}/${VERSION}.tar.gz
-          tar xfz ${VERSION}.tar.gz
+          curl -LO https://github.com/ruby/ruby.wasm/releases/download/"${PRERELEASE_TAG}"/"${VERSION}".tar.gz
+          tar xfz "${VERSION}".tar.gz
           mkdir tmp
-          mv ${VERSION}/usr/local/bin/ruby tmp/ruby.wasm
+          mv "${VERSION}"/usr/local/bin/ruby tmp/ruby.wasm
 
       - uses: ryand56/r2-upload-action@latest
         with:
