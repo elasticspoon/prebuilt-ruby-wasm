@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  update-ruby-wasm:
+  update-ruby-wasm-stable:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -36,3 +36,29 @@ jobs:
           r2-bucket: ${{ secrets.R2_BUCKET }}
           source-dir: tmp
           destination-dir: ./${{ matrix.version }}
+
+  update-ruby-wasm-unstable:
+    runs-on: ubuntu-latest
+    env:
+      VERSION: "ruby-head-wasm32-unknown-wasip1-full"
+      OUTPUT_VERSION: "ruby-head-unstable-wasm32-unknown-wasip1-full"
+    steps:
+      - name: Download lastest release binary
+        id: get_release
+        run: |
+          set -x
+          PRERELEASE_TAG=$(gh api repos/ruby/ruby.wasm/releases \
+            --jq '[.[] | select(.prerelease)][0].tag_name')
+          curl -LO https://github.com/ruby/ruby.wasm/releases/download/${PRERELEASE_TAG}/${VERSION}.tar.gz
+          tar xfz ${VERSION}.tar.gz
+          mkdir tmp
+          mv ${VERSION}/usr/local/bin/ruby tmp/ruby.wasm
+
+      - uses: ryand56/r2-upload-action@latest
+        with:
+          r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+          r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+          r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          r2-bucket: ${{ secrets.R2_BUCKET }}
+          source-dir: tmp
+          destination-dir: ./${{ env.OUTPUT_VERSION }}
